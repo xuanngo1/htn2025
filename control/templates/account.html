@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account - Hệ thống chiếu sáng thông minh</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <!-- Thanh điều hướng -->
+        <nav class="sidebar">
+            <h2>Menu</h2>
+            <ul>
+                <li><a href="{% url 'index' %}" class="active">Dashboard</a></li>
+                <li><a href="{% url 'history' %}">History</a></li>
+                <li><a href="{% url 'account' %}">Account</a></li>
+            </ul>
+        </nav>
+
+        <!-- Nội dung chính -->
+        <div class="main-content">
+            <h1>Account</h1>
+            <div class="account-content" id="account-content">
+                <!-- Thông tin user -->
+                <div class="card">
+                    <h3>Thông tin người dùng</h3>
+                    <p>Tên: <span id="user-name">Chưa đăng nhập</span></p>
+                    <p>Email: <span id="user-email">Chưa đăng nhập</span></p>
+                </div>
+
+                <!-- Nút đăng nhập/đăng xuất -->
+                <div class="card">
+                    <h3>Quản lý tài khoản</h3>
+                    <button id="login-btn" onclick="window.location.href='login.html'">Đăng nhập</button>
+                    <button id="logout-btn" onclick="logout()" style="display: none;">Đăng xuất</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'js/script.js' %}"></script>
+    <!-- <script>
+        // Kiểm tra trạng thái đăng nhập
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (currentUser) {
+            document.getElementById('login-btn').style.display = 'none';
+            document.getElementById('logout-btn').style.display = 'block';
+        }
+    </script> -->
+</body>
+</html>

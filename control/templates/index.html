@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Hệ thống chiếu sáng thông minh</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <!-- Thanh điều hướng -->
+        <nav class="sidebar">
+            <h2>Menu</h2>
+            <ul>
+                <li><a href="{% url 'index' %}" class="active">Dashboard</a></li>
+                <li><a href="{% url 'history' %}">History</a></li>
+                <li><a href="{% url 'account' %}">Account</a></li>
+            </ul>
+        </nav>
+        
+
+        <!-- Nội dung chính -->
+        <div class="main-content">
+            <h1>Dashboard</h1>
+            <div class="dashboard-content">
+                <!-- Hiển thị số đo cường độ ánh sáng -->
+                <div class="card">
+                    <h3>Cường độ ánh sáng</h3>
+                    <p id="light-value">0 lux</p>
+                </div>
+
+                <!-- Hiển thị chế độ hiện tại -->
+                <div class="card">
+                    <h3>Chế độ hiện tại</h3>
+                    <p id="current-mode">Đèn ăn cơm</p>
+                    <p id="mode-description" style="font-size: 14px; color: #666;"></p>
+                </div>
+
+                <!-- Nút bật/tắt đèn -->
+                <div class="card">
+                    <h3>Điều khiển đèn</h3>
+                    <button id="toggle-light" onclick="toggleLight()">Bật đèn</button>
+                </div>
+
+                <!-- Chọn chế độ -->
+                <div class="card">
+                    <h3>Chọn chế độ</h3>
+                    <select id="mode-select" onchange="changeMode()">
+                        <option value="dinner">Đèn ăn cơm</option>
+                        <option value="work">Đèn làm việc</option>
+                        <option value="movie">Đèn xem phim</option>
+                        <option value="sleep">Đèn đi ngủ</option>
+                        <option value="entertainment">Đèn giải trí</option>
+                    </select>
+                </div>
+
+                <!-- Ghi âm giọng nói -->
+                <div class="card">
+                    <h3>Điều khiển bằng giọng nói</h3>
+                    <button id="voice-control" onclick="startVoiceControl()">Ghi âm</button>
+                    <p id="voice-result">Đang chờ lệnh...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'js/script.js' %}"></script>
+    <!-- <script>
+        // Kiểm tra trạng thái đăng nhập
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser) {
+            alert('Vui lòng đăng nhập để truy cập!');
+            window.location.href = 'login.html';
+        }
+    </script> -->
+</body>
+</html>

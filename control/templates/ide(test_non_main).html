@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Điều khiển ESP32 bằng giọng nói</title>
+</head>
+<body>
+    <h1>Ánh sáng: <span id="light-value">Đang tải...</span></h1>
+    <button onclick="startVoiceControl()">🎤 Điều khiển đèn bằng giọng nói</button>
+
+    <script>
+        function fetchLightData() {
+            fetch('/api/light/')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("light-value").innerText = data.light;
+                });
+        }
+        setInterval(fetchLightData, 2000);
+
+        function sendCommand(command) {
+            fetch('/api/led/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ command: command })
+            });
+        }
+
+        function startVoiceControl() {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'vi-VN';
+            recognition.start();
+
+            recognition.onresult = function(event) {
+                const voiceText = event.results[0][0].transcript.toLowerCase();
+                console.log("Bạn nói: ", voiceText);
+
+                if (voiceText.includes("đi ngủ")) sendCommand("Đi ngủ");
+                else if (voiceText.includes("làm việc")) sendCommand("Làm việc");
+                else if (voiceText.includes("ăn cơm")) sendCommand("Ăn cơm");
+                else if (voiceText.includes("giải trí")) sendCommand("Giải trí");
+                else if (voiceText.includes("xem phim")) sendCommand("Xem phim");
+                else if (voiceText.includes("bật")) sendCommand("Bật");
+                else if (voiceText.includes("tắt")) sendCommand("Tắt");
+            };
+        }
+    </script>
+</body>
+</html>

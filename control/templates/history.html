@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History - Hệ thống chiếu sáng thông minh</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <!-- Thanh điều hướng -->
+        <nav class="sidebar">
+            <h2>Menu</h2>
+            <ul>
+                <li><a href="{% url 'index' %}" class="active">Dashboard</a></li>
+                <li><a href="{% url 'history' %}">History</a></li>
+                <li><a href="{% url 'account' %}">Account</a></li>
+            </ul>
+        </nav>
+
+        <!-- Nội dung chính -->
+        <div class="main-content">
+            <h1>History</h1>
+            <div class="history-content">
+                <!-- Tìm kiếm -->
+                <div class="search-bar">
+                    <input type="text" id="search-input" placeholder="Tìm kiếm lịch sử...">
+                    <button onclick="searchHistory()">Tìm kiếm</button>
+                </div>
+
+                <!-- Sắp xếp -->
+                <div class="sort-bar">
+                    <label for="sort-select">Sắp xếp theo: </label>
+                    <select id="sort-select" onchange="sortHistory()">
+                        <option value="newest">Mới nhất</option>
+                        <option value="oldest">Cũ nhất</option>
+                    </select>
+                </div>
+
+                <!-- Bảng lịch sử -->
+                <table id="history-table">
+                    <thead>
+                        <tr>
+                            <th>Thời gian</th>
+                            <th>Hành động</th>
+                            <th>Chế độ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-body">
+                        <!-- Dữ liệu sẽ được thêm bằng JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'js/script.js' %}"></script>
+    <!-- <script>
+        // Kiểm tra trạng thái đăng nhập
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser) {
+            alert('Vui lòng đăng nhập để truy cập!');
+            window.location.href = 'login.html';
+        }
+    </script> -->
+</body>
+</html>
