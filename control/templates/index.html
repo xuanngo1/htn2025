@@ -22,45 +22,91 @@
 
         <!-- Nội dung chính -->
         <div class="main-content">
-            <h1>Dashboard</h1>
+            <header>
+                <h1>Xin chào!</h1>
+            </header>
+
             <div class="dashboard-content">
+
                 <!-- Hiển thị số đo cường độ ánh sáng -->
-                <div class="card">
-                    <h3>Cường độ ánh sáng</h3>
-                    <p id="light-value">0 lux</p>
+                <div class="card temperature">
+                    <h3><i class="fas fa-thermometer-half"></i> Cường độ ánh sáng</h3>
+                    <p id="light-value">1235 Lux</p>
+                    <div class="progress-bar">
+                        <div class="progress" style="width: 80%;"></div>
+                    </div>
                 </div>
 
                 <!-- Hiển thị chế độ hiện tại -->
-                <div class="card">
-                    <h3>Chế độ hiện tại</h3>
-                    <p id="current-mode">Đèn ăn cơm</p>
+                <div class="card humidity">
+                    <h3><i class="fas fa-tint"></i> Chế độ hiện tại</h3>
+                    <p id="current-mode">Chưa hiển thị</p>
                     <p id="mode-description" style="font-size: 14px; color: #666;"></p>
                 </div>
 
                 <!-- Nút bật/tắt đèn -->
-                <div class="card">
-                    <h3>Điều khiển đèn</h3>
+                <div class="card light">
+                    <h3><i class="fas fa-sun"></i> Trạng thái đèn</h3>
                     <button id="toggle-light" onclick="toggleLight()">Bật đèn</button>
                 </div>
 
-                <!-- Chọn chế độ -->
-                <div class="card">
-                    <h3>Chọn chế độ</h3>
-                    <select id="mode-select" onchange="changeMode()">
-                        <option value="dinner">Đèn ăn cơm</option>
-                        <option value="work">Đèn làm việc</option>
-                        <option value="movie">Đèn xem phim</option>
-                        <option value="sleep">Đèn đi ngủ</option>
-                        <option value="entertainment">Đèn giải trí</option>
-                    </select>
-                </div>
-
                 <!-- Ghi âm giọng nói -->
-                <div class="card">
-                    <h3>Điều khiển bằng giọng nói</h3>
+                <div class="card voice-control">
+                    <h3><i class="fas fa-microphone"></i> Điều khiển bằng giọng nói</h3>
                     <button id="voice-control" onclick="startVoiceControl()">Ghi âm</button>
                     <p id="voice-result">Đang chờ lệnh...</p>
                 </div>
+
+                <!-- Chọn chế độ -->
+                
+
+                <div class="devices-container">
+                    <h3>Chọn chế độ</h3>
+                    <div class="devices">
+                        <div class="device">
+                            <i class="fas fa-utensils"></i>
+                            <p>Đèn ăn cơm</p>
+                            <label class="switch">
+                                <input type="radio" name="mode" value="dinner" onchange="changeMode(this,'Click')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="device">
+                            <i class="fas fa-briefcase"></i>
+                            <p>Đèn làm việc</p>
+                            <label class="switch">
+                                <input type="radio" name="mode" value="work" onchange="changeMode(this, 'Click')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="device">
+                            <i class="fas fa-film"></i>
+                            <p>Đèn xem phim</p>
+                            <label class="switch">
+                                <input type="radio" name="mode" value="movie" onchange="changeMode(this, 'Click')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="device">
+                            <i class="fas fa-bed"></i>
+                            <p>Đèn đi ngủ</p>
+                            <label class="switch">
+                                <input type="radio" name="mode" value="sleep" onchange="changeMode(this, 'Click')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="device">
+                            <i class="fas fa-gamepad"></i>
+                            <p>Đèn giải trí</p>
+                            <label class="switch">
+                                <input type="radio" name="mode" value="entertainment" onchange="changeMode(this,'Click')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                
             </div>
         </div>
     </div>

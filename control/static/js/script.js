@@ -4,7 +4,15 @@ function fetchLightData() {
     fetch('/api/light/')
         .then(response => response.json())
         .then(data => {
-            document.getElementById("light-value").innerText = data.light;
+            const light = data.light;
+            document.getElementById("light-value").innerText = `${light} Lux`;
+
+            // Tính phần trăm và giới hạn trong khoảng 0–100
+            const percent = Math.min((light / 3500) * 100, 100);
+            document.querySelector(".progress").style.width = `${percent}%`;
+        })
+        .catch(error => {
+            console.error("Lỗi khi lấy dữ liệu ánh sáng:", error);
         });
 }
 setInterval(fetchLightData, 2000);
@@ -13,13 +21,17 @@ setInterval(fetchLightData, 2000);
 // Dashboard: Điều khiển bằng giọng nói
 
 
-function sendCommand(command) {
+function sendCommand(command, source = "Click") {
     fetch('/api/led/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ command: command })
+        body: JSON.stringify({
+            command: command,
+            source: source
+        })
     });
 }
+
 
 function startVoiceControl() {
     const result = document.getElementById('voice-result');
@@ -37,13 +49,28 @@ function startVoiceControl() {
         console.log("Bạn nói: ", voiceText);
         result.textContent = `Đã nhận lệnh: ${voiceText}`;
 
-        if (voiceText.includes("đi ngủ")) sendCommand("Đi ngủ");
-        else if (voiceText.includes("làm việc")) sendCommand("Làm việc");
-        else if (voiceText.includes("ăn cơm")) sendCommand("Ăn cơm");
-        else if (voiceText.includes("giải trí")) sendCommand("Giải trí");
-        else if (voiceText.includes("xem phim")) sendCommand("Xem phim");
-        else if (voiceText.includes("bật")) sendCommand("Bật");
-        else if (voiceText.includes("tắt")) sendCommand("Tắt");
+        if (voiceText.includes("đi ngủ")) {
+            selectRadio('sleep');
+        }
+        else if (voiceText.includes("làm việc")) {
+            selectRadio('work');
+        }
+        else if (voiceText.includes("ăn cơm")) {
+            selectRadio('dinner');
+        }
+        else if (voiceText.includes("giải trí")) {
+            selectRadio('entertainment');
+        }
+        else if (voiceText.includes("xem phim")) {
+            selectRadio('movie');
+        }
+        else if (voiceText.includes("bật")) {
+            turnOnLight("Voice");
+        }
+        else if (voiceText.includes("tắt")) {
+            turnOffLight("Voice");
+        }
+
     };
     recognition.onerror = function(event) {
         result.textContent = 'Lỗi: ' + event.error;
@@ -56,77 +83,173 @@ function startVoiceControl() {
     };
     
 }
+function selectRadio(mode) {
+    const radio = document.querySelector(`input[name="mode"][value="${mode}"]`);
+    if (radio) {
+        radio.checked = true;  // Chọn radio này
+        changeMode(radio, "Voice");  // Gọi hàm changeMode
+    }
+}
 // Dashboard: Điều khiển đèn
 let isLightOn = false;
-function toggleLight() {
-    isLightOn = !isLightOn;
-    const button = document.getElementById('toggle-light');
-    button.textContent = isLightOn ? 'Tắt đèn' : 'Bật đèn';
-    
-    const command = isLightOn ? 'Bật' : 'Tắt';
-    sendCommand(command);
-    
-    addHistory(command + ' đèn', document.getElementById('current-mode').textContent);
+function turnOnLight(source = "Click") {
+    if (!isLightOn) {
+        isLightOn = true;
+        const button = document.getElementById('toggle-light');
+        button.textContent = 'Tắt đèn';
+        button.classList.add('light-on');  // 👉 thêm màu đỏ
+        sendCommand('Bật', source);
+        document.getElementById('current-mode').textContent = "Bật đèn";
+        document.getElementById('mode-description').textContent = "Đèn trong nhà đã được bật";
+        localStorage.setItem('lightStatus', 'on'); 
+    }
 }
 
+function turnOffLight(source = "Click") {
+    if (isLightOn) {
+        isLightOn = false;
+        const button = document.getElementById('toggle-light');
+        button.textContent = 'Bật đèn';
+        button.classList.remove('light-on');  // 👉 bỏ màu đỏ
+        sendCommand('Tắt', source);
+        document.getElementById('current-mode').textContent = "Tắt đèn";
+        document.getElementById('mode-description').textContent = "Đèn trong nhà đã tắt";
+
+        localStorage.removeItem('lightMode');
+        
+        const radios = document.querySelectorAll('input[name="mode"]');
+        radios.forEach(radio => radio.checked = false);
+
+        localStorage.setItem('lightStatus', 'off'); // ← lưu trạng thái tắt
+    }
+}
+
+function toggleLight(source = "Click") {
+    if (isLightOn) {
+        turnOffLight(source);
+    } else {
+        turnOnLight(source);
+    }
+}
 
 // Dashboard: Chọn chế độ
-function changeMode() {
-    const mode = document.getElementById('mode-select').value;
+function changeMode(radio, source) {
+    const mode = radio.value;
+    localStorage.setItem('lightMode', mode); // ← lưu chế độ
     let modeText = '';
     let modeDescription = '';
     switch (mode) {
         case 'dinner':
             modeText = 'Đèn ăn cơm';
             modeDescription = 'Ánh sáng ấm áp, tạo không khí gia đình.';
-            sendCommand('Ăn cơm');
+            sendCommand('Ăn cơm',source);
             break;
         case 'work':
             modeText = 'Đèn làm việc';
             modeDescription = 'Ánh sáng trắng, tập trung cao độ.';
-            sendCommand('Làm việc');
+            sendCommand('Làm việc',source);
             break;
         case 'movie':
             modeText = 'Đèn xem phim';
             modeDescription = 'Ánh sáng mờ, tăng trải nghiệm xem phim.';
-            sendCommand('Xem phim');
+            sendCommand('Xem phim',source);
             break;
         case 'sleep':
             modeText = 'Đèn đi ngủ';
             modeDescription = 'Ánh sáng dịu nhẹ, giúp thư giãn.';
-            sendCommand('Đi ngủ');
+            sendCommand('Đi ngủ',source);
             break;
         case 'entertainment':
             modeText = 'Đèn giải trí';
             modeDescription = 'Ánh sáng màu sắc, tạo không khí vui vẻ.';
-            sendCommand('Giải trí');
+            sendCommand('Giải trí',source);
             break;
         default:
             modeText = 'Đèn ăn cơm';
             modeDescription = 'Ánh sáng ấm áp, tạo không khí gia đình.';
-            sendCommand('Ăn cơm');
+            sendCommand('Ăn cơm',source);
     }
     document.getElementById('current-mode').textContent = modeText;
     document.getElementById('mode-description').textContent = modeDescription;
-    addHistory('Thay đổi chế độ', modeText);
 }
 
+function updateModeDisplay(mode) {
+    let modeText = '';
+    let modeDescription = '';
+    switch (mode) {
+        case 'dinner':
+            modeText = 'Đèn ăn cơm';
+            modeDescription = 'Ánh sáng ấm áp, tạo không khí gia đình.';
+            break;
+        case 'work':
+            modeText = 'Đèn làm việc';
+            modeDescription = 'Ánh sáng trắng, tập trung cao độ.';
+            break;
+        case 'movie':
+            modeText = 'Đèn xem phim';
+            modeDescription = 'Ánh sáng mờ, tăng trải nghiệm xem phim.';
+            break;
+        case 'sleep':
+            modeText = 'Đèn đi ngủ';
+            modeDescription = 'Ánh sáng dịu nhẹ, giúp thư giãn.';
+            break;
+        case 'entertainment':
+            modeText = 'Đèn giải trí';
+            modeDescription = 'Ánh sáng màu sắc, tạo không khí vui vẻ.';
+            break;
+        default:
+            modeText = 'Đèn ăn cơm';
+            modeDescription = 'Ánh sáng ấm áp, tạo không khí gia đình.';
+    }
 
-// History: Thêm lịch sử
-let historyData = [];
-function addHistory(action, mode) {
-    const time = new Date().toLocaleString();
-    historyData.push({ time, action, mode });
-    if (document.getElementById('history-body')) {
-        renderHistory();
+    document.getElementById('current-mode').textContent = modeText;
+    document.getElementById('mode-description').textContent = modeDescription;
+}
+
+function updateLightButtonUI(status) {
+    const button = document.getElementById('toggle-light');
+    if (status === 'on') {
+        button.textContent = 'Tắt đèn';
+        button.classList.add('light-on');
+        document.getElementById('current-mode').textContent = "Bật đèn";
+        document.getElementById('mode-description').textContent = "Đèn trong nhà đã được bật";
+    } else {
+        button.textContent = 'Bật đèn';
+        button.classList.remove('light-on');
+        document.getElementById('current-mode').textContent = "Tắt đèn";
+        document.getElementById('mode-description').textContent = "Đèn trong nhà đã tắt";
     }
 }
 
-// History: Hiển thị lịch sử
+
+// History: Tìm kiếm
+function searchHistory() {
+    const keyword = document.getElementById('search-input').value.toLowerCase();
+    historyData = originalData.filter(item => 
+        item.action.toLowerCase().includes(keyword) || 
+        item.mode.toLowerCase().includes(keyword) || 
+        item.time.toLowerCase().includes(keyword)
+    );
+    currentPage = 1; // Reset về trang đầu sau khi tìm kiếm
+    renderHistory();
+}
+
+    
+// Phân trang
+let currentPage = 1;
+const recordsPerPage = 10;
+
 function renderHistory() {
     const tbody = document.getElementById('history-body');
     tbody.innerHTML = '';
-    historyData.forEach(item => {
+
+    // Tính toán chỉ số bắt đầu và kết thúc của bản ghi trên trang hiện tại
+    const startIndex = (currentPage - 1) * recordsPerPage;
+    const endIndex = startIndex + recordsPerPage;
+    const paginatedData = historyData.slice(startIndex, endIndex);
+
+    // Hiển thị các bản ghi trên trang hiện tại
+    paginatedData.forEach(item => {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${item.time}</td>
@@ -135,18 +258,30 @@ function renderHistory() {
         `;
         tbody.appendChild(row);
     });
+
+    // Cập nhật thông tin phân trang
+    const totalPages = Math.ceil(historyData.length / recordsPerPage);
+    document.getElementById('page-info').textContent = `Trang ${currentPage} / ${totalPages}`;
+
+    // Vô hiệu hóa nút "Trước" nếu đang ở trang đầu
+    document.getElementById('prev-btn').disabled = currentPage === 1;
+    // Vô hiệu hóa nút "Tiếp" nếu đang ở trang cuối
+    document.getElementById('next-btn').disabled = currentPage === totalPages;
 }
 
-// History: Tìm kiếm
-function searchHistory() {
-    const keyword = document.getElementById('search-input').value.toLowerCase();
-    const filteredData = historyData.filter(item => 
-        item.action.toLowerCase().includes(keyword) || 
-        item.mode.toLowerCase().includes(keyword) || 
-        item.time.toLowerCase().includes(keyword)
-    );
-    historyData = filteredData;
-    renderHistory();
+function previousPage() {
+    if (currentPage > 1) {
+        currentPage--;
+        renderHistory();
+    }
+}
+
+function nextPage() {
+    const totalPages = Math.ceil(historyData.length / recordsPerPage);
+    if (currentPage < totalPages) {
+        currentPage++;
+        renderHistory();
+    }
 }
 
 // History: Sắp xếp
@@ -157,8 +292,46 @@ function sortHistory() {
         const timeB = new Date(b.time);
         return sortBy === 'newest' ? timeB - timeA : timeA - timeB;
     });
+    currentPage = 1; // Reset về trang đầu sau khi sắp xếp
     renderHistory();
 }
+
+// Khi trang được load
+document.addEventListener('DOMContentLoaded', () => {
+
+    try {
+        renderHistory();
+        console.log("Đã gọi renderHistory");
+    } catch (err) {
+        console.error("Lỗi khi renderHistory:", err);
+    }
+    try {
+        const lightStatus = localStorage.getItem('lightStatus');
+        if (lightStatus === 'on') {
+            isLightOn = true;
+            updateLightButtonUI('on');
+        } else if (lightStatus === 'off') {
+            isLightOn = false;
+            updateLightButtonUI('off');
+        }
+
+        const savedMode = localStorage.getItem('lightMode');
+        if (savedMode) {
+            const radio = document.querySelector(`input[name="mode"][value="${savedMode}"]`);
+            if (radio) {
+                radio.checked = true;
+                updateModeDisplay(savedMode);
+            }
+        }
+
+        console.log("Đã khôi phục lightStatus và lightMode");
+    } catch (err) {
+        console.error("Lỗi khi khôi phục trạng thái:", err);
+    }
+
+    
+});
+
 
 // Account: Đăng nhập/đăng xuất
 function login() {
@@ -170,12 +343,6 @@ function logout() {
     window.location.href = 'index.html';
 }
 
-// Khởi tạo dữ liệu giả lập
-window.onload = function() {
-    if (document.getElementById('history-body')) {
-        renderHistory();
-    }
-};
 // Chuyển đổi giữa tab Đăng nhập và Đăng ký
 function openTab(event, tabName) {
     const tabcontents = document.getElementsByClassName('tabcontent');
@@ -259,7 +426,7 @@ if (document.getElementById('user-name')) {
 
 // Cập nhật hàm logout
 function logout() {
-    localStorage.removeItem('currentUser');
-    alert('Đăng xuất thành công!');
-    window.location.href = 'login.html';
+    // Gửi request GET đến route Django logout
+    window.location.href = "/logout/";
 }
+

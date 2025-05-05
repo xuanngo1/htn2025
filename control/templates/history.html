@@ -13,15 +13,17 @@
         <nav class="sidebar">
             <h2>Menu</h2>
             <ul>
-                <li><a href="{% url 'index' %}" class="active">Dashboard</a></li>
-                <li><a href="{% url 'history' %}">History</a></li>
+                <li><a href="{% url 'index' %}" >Dashboard</a></li>
+                <li><a href="{% url 'history' %}" class="active">History</a></li>
                 <li><a href="{% url 'account' %}">Account</a></li>
             </ul>
         </nav>
 
         <!-- Nội dung chính -->
         <div class="main-content">
-            <h1>History</h1>
+            <header>
+                <h1>Lịch sử</h1>
+            </header>
             <div class="history-content">
                 <!-- Tìm kiếm -->
                 <div class="search-bar">
@@ -44,17 +46,44 @@
                         <tr>
                             <th>Thời gian</th>
                             <th>Hành động</th>
-                            <th>Chế độ</th>
+                            <th>Chế độ đèn</th>
                         </tr>
                     </thead>
                     <tbody id="history-body">
-                        <!-- Dữ liệu sẽ được thêm bằng JavaScript -->
+                        <!-- {% for log in logs %}
+                        <tr>
+                            <td>{{ log.timestamp|date:"d/m/Y H:i:s" }}</td> 
+                            <td>{{ log.status }}</td>
+                            <td>{{ log.source }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3">Không có lịch sử nào.</td>
+                        </tr>
+                        {% endfor %} -->
                     </tbody>
                 </table>
+
+                <!-- Phân trang -->
+                 
+                <div class="pagination">
+                    <button onclick="previousPage()" id="prev-btn">Trước</button>
+                    <span id="page-info">Trang 1 / 1</span>
+                    <button onclick="nextPage()" id="next-btn">Tiếp</button>
+                </div>
+
             </div>
         </div>
     </div>
+    {{ log_list|json_script:"log-data" }}
+    <script>
+        // Gán dữ liệu vào biến toàn cục để file JS có thể dùng
+        const originalData = JSON.parse(document.getElementById('log-data').textContent);
+        let historyData = [...originalData]; 
+    </script>
+        
     <script src="{% static 'js/script.js' %}"></script>
+    
     <!-- <script>
         // Kiểm tra trạng thái đăng nhập
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
